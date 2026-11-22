@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Win11OptimizationCenter.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Win11OptimizationCenter"
+    xmlns:vm="using:Win11OptimizationCenter.ViewModels"
+    Background="{ThemeResource AppPageBackgroundBrush}">
+    <Page.Resources>
+        <DataTemplate x:Key="AdapterTemplate" x:DataType="vm:AdapterStatus">
+            <Grid Padding="14" ColumnSpacing="14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Border
+                    Width="40"
+                    Height="40"
+                    CornerRadius="20"
+                    Background="{ThemeResource AppSurfaceStrongBrush}">
+                    <FontIcon
+                        Glyph="{x:Bind Category, Converter={StaticResource StringToIconConverter}, Mode=OneTime}"
+                        FontSize="18"
+                        Foreground="{ThemeResource SystemAccentColor}" />
+                </Border>
+                <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Bind Name, Mode=OneTime}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <TextBlock
+                        Text="{x:Bind Description, Mode=OneTime}"
+                        FontSize="13"
+                        Foreground="{ThemeResource AppMutedTextBrush}"
+                        TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Spacing="4" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Bind Status, Mode=OneTime}" TextAlignment="Right" />
+                    <TextBlock
+                        Text="{x:Bind Speed, Mode=OneTime}"
+                        FontSize="13"
+                        Foreground="{ThemeResource AppMutedTextBrush}"
+                        TextAlignment="Right" />
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+        <local:IconGlyphConverter x:Key="StringToIconConverter" />
+        <Style TargetType="ListViewItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+    </Page.Resources>
+
+    <Grid MaxWidth="1160" Padding="28,20" RowSpacing="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="4" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="2*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid ColumnSpacing="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Border
+                Width="48"
+                Height="48"
+                CornerRadius="12"
+                Background="{ThemeResource AppSurfaceStrongBrush}"
+                VerticalAlignment="Center">
+                <FontIcon
+                    Glyph="&#xE839;"
+                    FontSize="24"
+                    Foreground="{ThemeResource SystemAccentColor}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center" />
+            </Border>
+            <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                <TextBlock
+                    Text="{x:Bind ViewModel.Strings.AppTitle, Mode=OneWay, FallbackValue='Windows 11 Optimization Center'}"
+                    Style="{StaticResource TitleLargeTextBlockStyle}" />
+                <TextBlock
+                    Text="{x:Bind ViewModel.Strings.AppSubtitle, Mode=OneWay, FallbackValue='Network adapters, USB and power management'}"
+                    FontSize="15"
+                    Foreground="{ThemeResource AppMutedTextBrush}" />
+            </StackPanel>
+            <Button
+                Grid.Column="2"
+                Command="{x:Bind ViewModel.ScanCommand}"
+                IsEnabled="{x:Bind local:MainPage.Not(ViewModel.IsBusy), Mode=OneWay}"
+                VerticalAlignment="Center"
+                Margin="0,0,12,0"
+                ToolTipService.ToolTip="{x:Bind ViewModel.Strings.ScanTooltip, Mode=OneWay, FallbackValue='Refresh the detected network adapters.'}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE72C;" FontSize="16" />
+                    <TextBlock
+                        Text="{x:Bind ViewModel.Strings.ScanAgain, Mode=OneWay, FallbackValue='Scan again'}"
+                        FontSize="14" />
+                </StackPanel>
+            </Button>
+            <ComboBox
+                Grid.Column="3"
+                Header="{x:Bind ViewModel.Strings.LanguageLabel, Mode=OneWay, FallbackValue='Language'}"
+                SelectedItem="{x:Bind ViewModel.SelectedLanguage, Mode=TwoWay}"
+                Width="148"
+                VerticalAlignment="Center"
+                ToolTipService.ToolTip="English / Polski">
+                <x:String>English</x:String>
+                <x:String>Polski</x:String>
+            </ComboBox>
+        </Grid>
+
+        <ProgressBar
+            Grid.Row="1"
+            Height="4"
+            IsIndeterminate="True"
+            Visibility="{x:Bind local:MainPage.BoolToVisibility(ViewModel.IsBusy), Mode=OneWay}" />
+
+        <InfoBar
+            Grid.Row="2"
+            IsOpen="True"
+            IsClosable="False"
+            Severity="{x:Bind ViewModel.StatusSeverity, Mode=OneWay}"
+            Title="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+            Message="{x:Bind ViewModel.LastOperation, Mode=OneWay}" />
+
+        <Grid Grid.Row="3" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Border
+                Padding="16"
+                CornerRadius="10"
+                Background="{ThemeResource AppSurfaceBrush}"
+                BorderBrush="{ThemeResource AppCardBorderBrush}"
+                BorderThickness="1">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <FontIcon
+                        Glyph="&#xE839;"
+                        FontSize="22"
+                        Foreground="{ThemeResource SystemAccentColor}"
+                        VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" Spacing="4">
+                        <TextBlock Text="{x:Bind ViewModel.AdapterCount, Mode=OneWay}" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        <TextBlock
+                            Text="{x:Bind ViewModel.Strings.DetectedAdapters, Mode=OneWay, FallbackValue='Detected adapters'}"
+                            FontSize="13"
+                            Foreground="{ThemeResource AppMutedTextBrush}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Border
+                Grid.Column="1"
+                Padding="16"
+                CornerRadius="10"
+                Background="{ThemeResource AppSurfaceBrush}"
+                BorderBrush="{ThemeResource AppCardBorderBrush}"
+                BorderThickness="1">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <FontIcon
+                        Glyph="&#xE774;"
+                        FontSize="22"
+                        Foreground="{ThemeResource SystemAccentColor}"
+                        VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" Spacing="4">
+                        <TextBlock Text="{x:Bind ViewModel.ConnectedAdapterCount, Mode=OneWay}" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        <TextBlock
+                            Text="{x:Bind ViewModel.Strings.ActiveConnections, Mode=OneWay, FallbackValue='Active connections'}"
+                            FontSize="13"
+                            Foreground="{ThemeResource AppMutedTextBrush}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Border
+                Grid.Column="2"
+                Padding="16"
+                CornerRadius="10"
+                Background="{ThemeResource AppSurfaceBrush}"
+                BorderBrush="{ThemeResource AppCardBorderBrush}"
+                BorderThickness="1">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <FontIcon
+                        Glyph="&#xE945;"
+                        FontSize="22"
+                        Foreground="{ThemeResource SystemAccentColor}"
+                        VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" Spacing="4">
+                        <TextBlock Text="USB + Wi-Fi" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        <TextBlock
+                            Text="{x:Bind ViewModel.Strings.PowerScope, Mode=OneWay, FallbackValue='Power-management scope'}"
+                            FontSize="13"
+                            Foreground="{ThemeResource AppMutedTextBrush}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="4" ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.6*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Border
+                Padding="18"
+                CornerRadius="10"
+                Background="{ThemeResource AppSurfaceBrush}"
+                BorderBrush="{ThemeResource AppCardBorderBrush}"
+                BorderThickness="1">
+                <StackPanel Spacing="12">
+                    <Grid>
+                        <TextBlock
+                            Text="{x:Bind ViewModel.Strings.AdaptersTitle, Mode=OneWay, FallbackValue='Network adapters'}"
+                            Style="{StaticResource SubtitleTextBlockStyle}" />
+                        <TextBlock
+                            Text="{x:Bind ViewModel.AdapterCount, Mode=OneWay}"
+                            HorizontalAlignment="Right"
+                            Foreground="{ThemeResource AppMutedTextBrush}" />
+                    </Grid>
+                    <ListView
+                        ItemsSource="{x:Bind ViewModel.Adapters, Mode=OneWay}"
+                        SelectedItem="{x:Bind ViewModel.SelectedAdapter, Mode=TwoWay}"
+                        ItemTemplate="{StaticResource AdapterTemplate}"
+                        SelectionMode="Single"
+                        Height="270"
+                        ToolTipService.ToolTip="{x:Bind ViewModel.Strings.AdapterSelectionTooltip, Mode=OneWay, FallbackValue='Select an adapter to target it with the Custom profile.'}" />
+                    <TextBlock
+                        Text="{x:Bind ViewModel.Strings.NoAdapters, Mode=OneWay, FallbackValue='No adapters found. Select Scan again to retry.'}"
+                        TextWrapping="Wrap"
+                        Foreground="{ThemeResource AppMutedTextBrush}"
+                        Visibility="{x:Bind local:MainPage.InvertBoolToVisibility(ViewModel.HasAdapters), Mode=OneWay}" />
+                </StackPanel>
+            </Border>
+
+            <ScrollViewer
+                Grid.Column="1"
+                VerticalScrollBarVisibility="Auto"
+                HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Spacing="12">
+                <Border
+                    Padding="18"
+                    CornerRadius="10"
+                    Background="{ThemeResource AppSurfaceBrush}"
+                    BorderBrush="{ThemeResource AppCardBorderBrush}"
+                    BorderThickness="1">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock
+                                Text="{x:Bind ViewModel.Strings.ProfileTitle, Mode=OneWay, FallbackValue='Optimization profile'}"
+                                Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <Button
+                                x:Name="ProfileHelpButton"
+                                Content="?"
+                                Padding="0"
+                                Width="26"
+                                Height="26"
+                                Click="ProfileHelpButton_Click"
+                                ToolTipService.ToolTip="{x:Bind ViewModel.Strings.ProfileHelpTitle, Mode=OneWay, FallbackValue='Optimization profiles'}" />
+                            </StackPanel>
+                        <ComboBox
+                            Header="{x:Bind ViewModel.Strings.ProfilePickerLabel, Mode=OneWay, FallbackValue='Choose a profile'}"
+                            ItemsSource="{x:Bind ViewModel.Profiles, Mode=OneWay}"
+                            SelectedItem="{x:Bind ViewModel.SelectedProfile, Mode=TwoWay}"
+                            DisplayMemberPath="DisplayName"
+                            HorizontalAlignment="Stretch" />
+                        <CheckBox
+                            Content="{x:Bind ViewModel.Strings.GenerateLog, Mode=OneWay, FallbackValue='Save detailed log'}"
+                            IsChecked="{x:Bind ViewModel.GenerateLog, Mode=TwoWay}"
+                            ToolTipService.ToolTip="{x:Bind ViewModel.Strings.GenerateLogTooltip, Mode=OneWay, FallbackValue='Save the operation log in your local user profile.'}" />
+                        <Border
+                            Padding="12"
+                            CornerRadius="8"
+                            Background="{ThemeResource AppSurfaceStrongBrush}"
+                            BorderBrush="{ThemeResource AppCardBorderBrush}"
+                            BorderThickness="1">
+                            <Grid ColumnSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <FontIcon
+                                    Glyph="&#xE946;"
+                                    FontSize="18"
+                                    Foreground="{ThemeResource SystemAccentColor}"
+                                    VerticalAlignment="Top" />
+                                <StackPanel Grid.Column="1" Spacing="5">
+                                    <TextBlock
+                                        Text="{x:Bind ViewModel.Strings.ProfileDescriptionTitle, Mode=OneWay, FallbackValue='What this profile does'}"
+                                        Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                    <TextBlock
+                                        Text="{x:Bind ViewModel.ProfileDescription, Mode=OneWay}"
+                                        FontSize="14"
+                                        LineHeight="20"
+                                        TextWrapping="Wrap"
+                                        Foreground="{ThemeResource AppTextBrush}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button
+                                Command="{x:Bind ViewModel.ApplyCommand}"
+                                Style="{StaticResource AccentButtonStyle}"
+                                IsEnabled="{x:Bind local:MainPage.Not(ViewModel.IsBusy), Mode=OneWay}"
+                                ToolTipService.ToolTip="{x:Bind ViewModel.Strings.ApplyTooltip, Mode=OneWay, FallbackValue='Starts the script after you approve the Windows UAC prompt.'}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE73E;" FontSize="16" />
+                                    <TextBlock
+                                        Text="{x:Bind ViewModel.Strings.ApplySettings, Mode=OneWay, FallbackValue='Apply settings'}"
+                                        FontSize="14" />
+                                </StackPanel>
+                            </Button>
+                            <Button
+                                Command="{x:Bind ViewModel.OpenLogCommand}"
+                                IsEnabled="{x:Bind local:MainPage.Not(ViewModel.IsBusy), Mode=OneWay}"
+                                Content="{x:Bind ViewModel.Strings.OpenLog, Mode=OneWay, FallbackValue='Open log'}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                <Border
+                    Padding="18"
+                    CornerRadius="10"
+                    Background="{ThemeResource AppSurfaceBrush}"
+                    BorderBrush="{ThemeResource AppCardBorderBrush}"
+                    BorderThickness="1">
+                    <StackPanel Spacing="6">
+                        <TextBlock
+                            Text="{x:Bind ViewModel.Strings.SecurityTitle, Mode=OneWay, FallbackValue='Security'}"
+                            Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <TextBlock
+                            Text="{x:Bind ViewModel.Strings.SecurityDescription, Mode=OneWay, FallbackValue='Scanning only reads device information. Changes require approval.'}"
+                            FontSize="14"
+                            LineHeight="20"
+                            TextWrapping="Wrap"
+                            Foreground="{ThemeResource AppMutedTextBrush}" />
+                    </StackPanel>
+                </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <Border
+            Grid.Row="5"
+            Padding="14"
+            CornerRadius="10"
+            Background="{ThemeResource AppLogBackgroundBrush}"
+            BorderBrush="{ThemeResource AppCardBorderBrush}"
+            BorderThickness="1">
+            <StackPanel Spacing="8">
+                <Grid>
+                    <TextBlock
+                        Text="{x:Bind ViewModel.Strings.LogTitle, Mode=OneWay, FallbackValue='Operation details'}"
+                        Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <TextBlock
+                        Text="{x:Bind ViewModel.LogLocation, Mode=OneWay}"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        FontSize="12"
+                        Foreground="{ThemeResource AppMutedTextBrush}"
+                        TextTrimming="CharacterEllipsis"
+                        ToolTipService.ToolTip="{x:Bind ViewModel.LogLocation, Mode=OneWay}" />
+                </Grid>
+                <TextBox
+                    Text="{x:Bind ViewModel.LogText, Mode=OneWay}"
+                    IsReadOnly="True"
+                    TextWrapping="Wrap"
+                    FontFamily="Cascadia Mono"
+                    FontSize="13"
+                    Foreground="{ThemeResource AppLogForegroundBrush}"
+                    Background="{ThemeResource AppLogBackgroundBrush}"
+                    BorderThickness="0"
+                    MinHeight="140"
+                    VerticalAlignment="Stretch"
+                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto" />
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="6" ColumnSpacing="14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Border
+                Padding="12,9"
+                CornerRadius="10"
+                Background="{ThemeResource AppSurfaceBrush}"
+                BorderBrush="{ThemeResource AppCardBorderBrush}"
+                BorderThickness="1">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <FontIcon
+                        Glyph="&#xE946;"
+                        FontSize="20"
+                        Foreground="{ThemeResource SystemAccentColor}"
+                        VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" Spacing="2">
+                        <TextBlock
+                            Text="{x:Bind ViewModel.Strings.AboutTitle, Mode=OneWay, FallbackValue='About'}"
+                            Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <TextBlock
+                            Text="{x:Bind ViewModel.Strings.AboutDescription, Mode=OneWay, FallbackValue='A Windows 11 network, USB and power-management utility.'}"
+                            FontSize="13"
+                            Foreground="{ThemeResource AppMutedTextBrush}"
+                            TextTrimming="CharacterEllipsis" />
+                        <TextBlock
+                            Text="{x:Bind ViewModel.Strings.VersionLabel, Mode=OneWay, FallbackValue='Version 1.0.0'}"
+                            FontSize="12"
+                            Foreground="{ThemeResource AppMutedTextBrush}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Button
+                Grid.Column="1"
+                Content="{x:Bind ViewModel.Strings.Close, Mode=OneWay, FallbackValue='Close'}"
+                Click="ExitButton_Click"
+                HorizontalAlignment="Right"
+                MinWidth="104"
+                Height="42"
+                ToolTipService.ToolTip="{x:Bind ViewModel.Strings.CloseTooltip, Mode=OneWay, FallbackValue='Close the application.'}" />
+        </Grid>
+
+        <TeachingTip
+            x:Name="ProfileHelpTip"
+            Target="{x:Bind ProfileHelpButton, Mode=OneTime}"
+            Title="{x:Bind ViewModel.Strings.ProfileHelpTitle, Mode=OneWay, FallbackValue='Optimization profiles'}"
+            Subtitle="{x:Bind ViewModel.Strings.ProfileHelpText, Mode=OneWay, FallbackValue='Standard applies supported settings. Diagnostic also saves a detailed log. Test makes no changes. Custom limits network changes to the selected adapter.'}"
+            IsLightDismissEnabled="True"
+            PreferredPlacement="Bottom" />
+    </Grid>
+</Page>

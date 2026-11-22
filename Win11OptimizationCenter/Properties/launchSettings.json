@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Win11OptimizationCenter (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Win11OptimizationCenter (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
