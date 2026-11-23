@@ -11,12 +11,12 @@
   <Identity
     Name="63BD8B7F-5E2F-4331-9DAE-648EB9BEC8EB"
     Publisher="CN=AppPublisher"
-    Version="1.1.0.0" />
+    Version="1.2.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="63BD8B7F-5E2F-4331-9DAE-648EB9BEC8EB" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>Windows 11 Network Interface &amp; USB Power Optimizer</DisplayName>
+    <DisplayName>Windows 11 Network &amp; USB Optimizer</DisplayName>
     <PublisherDisplayName>AppPublisher</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -35,7 +35,7 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="Windows 11 Network Interface &amp; USB Power Optimizer"
+        DisplayName="Windows 11 Network &amp; USB Optimizer"
         Description="Network adapter and USB power management for Intel Wi-Fi 6E AX210, Realtek RTL8125, and USB selective suspend."
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"

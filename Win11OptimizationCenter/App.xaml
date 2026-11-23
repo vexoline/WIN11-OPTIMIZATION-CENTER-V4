@@ -20,6 +20,9 @@
                     <SolidColorBrush x:Key="AppCardBorderBrush" Color="#FFD5E0EE" />
                     <SolidColorBrush x:Key="AppLogBackgroundBrush" Color="#FFEAF0F8" />
                     <SolidColorBrush x:Key="AppLogForegroundBrush" Color="#FF132239" />
+                    <SolidColorBrush x:Key="ExitButtonBackgroundBrush" Color="#FFFFE8E6" />
+                    <SolidColorBrush x:Key="ExitButtonForegroundBrush" Color="#FFC42B1C" />
+                    <SolidColorBrush x:Key="ExitButtonBorderBrush" Color="#FFEB9A93" />
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
                     <SolidColorBrush x:Key="AppPageBackgroundBrush" Color="#FF071426" />
@@ -31,6 +34,9 @@
                     <SolidColorBrush x:Key="AppCardBorderBrush" Color="#FF274466" />
                     <SolidColorBrush x:Key="AppLogBackgroundBrush" Color="#FF07111E" />
                     <SolidColorBrush x:Key="AppLogForegroundBrush" Color="#FFD9F2FF" />
+                    <SolidColorBrush x:Key="ExitButtonBackgroundBrush" Color="#FF4A1717" />
+                    <SolidColorBrush x:Key="ExitButtonForegroundBrush" Color="#FFFF8782" />
+                    <SolidColorBrush x:Key="ExitButtonBorderBrush" Color="#FF8B3934" />
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="HighContrast">
                     <SolidColorBrush x:Key="AppPageBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
@@ -42,8 +48,21 @@
                     <SolidColorBrush x:Key="AppCardBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
                     <SolidColorBrush x:Key="AppLogBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
                     <SolidColorBrush x:Key="AppLogForegroundBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="ExitButtonBackgroundBrush" Color="{ThemeResource SystemColorButtonFaceColor}" />
+                    <SolidColorBrush x:Key="ExitButtonForegroundBrush" Color="{ThemeResource SystemColorButtonTextColor}" />
+                    <SolidColorBrush x:Key="ExitButtonBorderBrush" Color="{ThemeResource SystemColorButtonTextColor}" />
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
+            <Style
+                x:Key="ExitButtonStyle"
+                BasedOn="{StaticResource AccentButtonStyle}"
+                TargetType="Button">
+                <Setter Property="Background" Value="{ThemeResource ExitButtonBackgroundBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource ExitButtonBorderBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Foreground" Value="{ThemeResource ExitButtonForegroundBrush}" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

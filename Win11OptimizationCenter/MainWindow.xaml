@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:Win11OptimizationCenter"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="Windows 11 Optimization Center"
+    Title="Windows 11 Network &amp; USB Optimizer"
     mc:Ignorable="d">
     <Window.SystemBackdrop>
         <MicaBackdrop />
@@ -25,7 +25,7 @@
             Background="Transparent">
             <TitleBar
                 x:Name="AppTitleBar"
-                Title="Windows 11 Optimization Center"
+                Title="Windows 11 Network &amp; USB Optimizer"
                 Subtitle="USB • Wi-Fi • Ethernet • Power management"
                 Height="48"
                 FontSize="17"

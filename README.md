@@ -1,6 +1,6 @@
 <div align="center">
 
-# Windows 11 USB & Network Adapter Optimization
+# Windows 11 Network & USB Optimizer
 
 ### A bilingual WinUI 3 control center and PowerShell toolkit for USB power and supported network adapters.
 
