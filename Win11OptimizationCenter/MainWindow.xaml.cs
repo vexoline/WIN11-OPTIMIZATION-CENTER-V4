@@ -40,8 +40,8 @@ public sealed partial class MainWindow : Window
             scale = 1;
         }
 
-        var width = Math.Min((int)Math.Round(1120 * scale), (int)(workArea.Width * 0.92));
-        var height = Math.Min((int)Math.Round(880 * scale), (int)(workArea.Height * 0.9));
+        var width = Math.Min((int)Math.Round(1240 * scale), (int)(workArea.Width * 0.92));
+        var height = Math.Min((int)Math.Round(900 * scale), (int)(workArea.Height * 0.9));
         AppWindow.Resize(new SizeInt32(width, height));
         AppWindow.Move(new PointInt32(
             workArea.X + (workArea.Width - width) / 2,

@@ -22,7 +22,7 @@
   </a>
 </p>
 
-**Discover adapters. Choose a profile. Review the changes before applying them.**
+**Discover adapters. Choose a profile. Follow live progress while it runs.**
 
 </div>
 
@@ -42,7 +42,9 @@ The dashboard helps you inspect physical network adapters and choose how to appl
 
 - a selectable adapter list with detected and connected adapter counts;
 - an English/Polish language selector and profile descriptions that update with your selection;
-- an About section, operation status, completion code, and live output;
+- an About dialog with app version, author, GitHub, and email links;
+- operation status and a scrolling live-output panel;
+- a hidden PowerShell window; progress is streamed to the app while the UAC approval prompt remains visible;
 - light, dark, and high-contrast theme support;
 - logs saved to `%LOCALAPPDATA%\Win11OptimizationCenter\Log`.
 

@@ -28,7 +28,7 @@
                 Title="Windows 11 Optimization Center"
                 Subtitle="USB • Wi-Fi • Ethernet • Power management"
                 Height="48"
-                FontSize="16"
+                FontSize="17"
                 FontWeight="SemiBold"
                 VerticalAlignment="Stretch"
                 VerticalContentAlignment="Center"

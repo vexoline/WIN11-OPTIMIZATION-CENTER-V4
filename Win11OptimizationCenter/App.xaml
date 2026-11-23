@@ -15,7 +15,8 @@
                     <SolidColorBrush x:Key="AppSurfaceBrush" Color="#FFF5F8FC" />
                     <SolidColorBrush x:Key="AppSurfaceStrongBrush" Color="#FFD7E4F3" />
                     <SolidColorBrush x:Key="AppTextBrush" Color="#FF10243D" />
-                    <SolidColorBrush x:Key="AppMutedTextBrush" Color="#FF5C6B7E" />
+                    <SolidColorBrush x:Key="AppMutedTextBrush" Color="#FF354D68" />
+                    <SolidColorBrush x:Key="AppIconBrush" Color="#FF0067C0" />
                     <SolidColorBrush x:Key="AppCardBorderBrush" Color="#FFD5E0EE" />
                     <SolidColorBrush x:Key="AppLogBackgroundBrush" Color="#FFEAF0F8" />
                     <SolidColorBrush x:Key="AppLogForegroundBrush" Color="#FF132239" />
@@ -25,7 +26,8 @@
                     <SolidColorBrush x:Key="AppSurfaceBrush" Color="#FF102542" />
                     <SolidColorBrush x:Key="AppSurfaceStrongBrush" Color="#FF16365D" />
                     <SolidColorBrush x:Key="AppTextBrush" Color="#FFE7F0FC" />
-                    <SolidColorBrush x:Key="AppMutedTextBrush" Color="#FFB2C2D8" />
+                    <SolidColorBrush x:Key="AppMutedTextBrush" Color="#FFE6F0FC" />
+                    <SolidColorBrush x:Key="AppIconBrush" Color="#FF62B6FF" />
                     <SolidColorBrush x:Key="AppCardBorderBrush" Color="#FF274466" />
                     <SolidColorBrush x:Key="AppLogBackgroundBrush" Color="#FF07111E" />
                     <SolidColorBrush x:Key="AppLogForegroundBrush" Color="#FFD9F2FF" />
@@ -36,6 +38,7 @@
                     <SolidColorBrush x:Key="AppSurfaceStrongBrush" Color="{ThemeResource SystemColorWindowColor}" />
                     <SolidColorBrush x:Key="AppTextBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
                     <SolidColorBrush x:Key="AppMutedTextBrush" Color="{ThemeResource SystemColorGrayTextColor}" />
+                    <SolidColorBrush x:Key="AppIconBrush" Color="{ThemeResource SystemColorHotlightColor}" />
                     <SolidColorBrush x:Key="AppCardBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
                     <SolidColorBrush x:Key="AppLogBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}" />
                     <SolidColorBrush x:Key="AppLogForegroundBrush" Color="{ThemeResource SystemColorWindowTextColor}" />

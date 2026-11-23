@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 using System.Text.Json;
 
 namespace Win11OptimizationCenter.ViewModels;
@@ -71,7 +72,10 @@ public partial class MainPageViewModel : ObservableObject
     public string LogPath =>
         Path.Combine(LogDirectory, "WIN11_USB_NETWORK_OPTIMIZATION.log");
 
-    public string LogLocation => LogPath;
+    public string LiveLogPath =>
+        Path.Combine(LogDirectory, "WIN11_USB_NETWORK_OPTIMIZATION.live.log");
+
+    public string LogLocation => LiveLogPath;
 
     public MainPageViewModel()
     {
@@ -222,18 +226,25 @@ public partial class MainPageViewModel : ObservableObject
             {
                 File.Delete(LogPath);
             }
+            if (File.Exists(LiveLogPath))
+            {
+                File.Delete(LiveLogPath);
+            }
 
             var shouldGenerateLog = GenerateLog || SelectedProfileId == "Diagnostyczny (z logowaniem)";
-            LogText = shouldGenerateLog ? Strings.LogStarting : Strings.LogDisabled;
+            LogText = Strings.LogStarting;
 
             var startInfo = new ProcessStartInfo
             {
                 FileName = "powershell.exe",
                 UseShellExecute = true,
                 Verb = "runas",
+                WindowStyle = ProcessWindowStyle.Hidden,
                 WorkingDirectory = Path.GetDirectoryName(ScriptPath)!
             };
             startInfo.ArgumentList.Add("-NoProfile");
+            startInfo.ArgumentList.Add("-WindowStyle");
+            startInfo.ArgumentList.Add("Hidden");
             startInfo.ArgumentList.Add("-ExecutionPolicy");
             startInfo.ArgumentList.Add("Bypass");
             startInfo.ArgumentList.Add("-File");
@@ -252,11 +263,14 @@ public partial class MainPageViewModel : ObservableObject
                 startInfo.ArgumentList.Add(SelectedAdapter!.Name);
             }
 
+            startInfo.ArgumentList.Add("-LiveLogPath");
+            startInfo.ArgumentList.Add(LiveLogPath);
+            startInfo.ArgumentList.Add("-LogDirectory");
+            startInfo.ArgumentList.Add(LogDirectory);
+
             if (shouldGenerateLog)
             {
                 startInfo.ArgumentList.Add("-GenerateLog");
-                startInfo.ArgumentList.Add("-LogDirectory");
-                startInfo.ArgumentList.Add(LogDirectory);
             }
 
             startInfo.ArgumentList.Add("-NonInteractive");
@@ -314,15 +328,16 @@ public partial class MainPageViewModel : ObservableObject
         try
         {
             Directory.CreateDirectory(LogDirectory);
-            var target = File.Exists(LogPath) ? LogPath : LogDirectory;
+            var target = File.Exists(LogPath) ? LogPath :
+                File.Exists(LiveLogPath) ? LiveLogPath : LogDirectory;
             Process.Start(new ProcessStartInfo
             {
                 FileName = target,
                 UseShellExecute = true
             });
             StatusSeverity = InfoBarSeverity.Informational;
-            StatusMessage = File.Exists(LogPath) ? Strings.LogOpenedStatus : Strings.LogFolderOpenedStatus;
-            LastOperation = LogPath;
+            StatusMessage = target == LogDirectory ? Strings.LogFolderOpenedStatus : Strings.LogOpenedStatus;
+            LastOperation = target;
         }
         catch (Exception ex)
         {
@@ -336,26 +351,27 @@ public partial class MainPageViewModel : ObservableObject
     {
         while (!process.HasExited)
         {
-            try
-            {
-                await RefreshLogAsync();
-            }
-            catch (IOException) when (!process.HasExited)
-            {
-            }
-
-            await Task.Delay(400);
+            await RefreshLogAsync();
+            await Task.Delay(250);
         }
     }
 
     private async Task RefreshLogAsync()
     {
-        if (!File.Exists(LogPath))
+        if (!File.Exists(LiveLogPath))
         {
             return;
         }
 
-        var content = await File.ReadAllTextAsync(LogPath);
+        await using var stream = new FileStream(
+            LiveLogPath,
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.ReadWrite | FileShare.Delete,
+            bufferSize: 4096,
+            useAsync: true);
+        using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+        var content = await reader.ReadToEndAsync();
         if (!string.IsNullOrEmpty(content))
         {
             LogText = content;
@@ -475,6 +491,9 @@ public sealed record UiStrings
     public string WindowSubtitle { get; init; } = string.Empty;
     public string AppTitle { get; init; } = string.Empty;
     public string AppSubtitle { get; init; } = string.Empty;
+    public string AdapterColumn { get; init; } = string.Empty;
+    public string StatusColumn { get; init; } = string.Empty;
+    public string SpeedColumn { get; init; } = string.Empty;
     public string LanguageLabel { get; init; } = string.Empty;
     public string ScanAgain { get; init; } = string.Empty;
     public string ScanTooltip { get; init; } = string.Empty;
@@ -514,6 +533,9 @@ public sealed record UiStrings
     public string LogTitle { get; init; } = string.Empty;
     public string AboutTitle { get; init; } = string.Empty;
     public string AboutDescription { get; init; } = string.Empty;
+    public string AboutAuthorLabel { get; init; } = string.Empty;
+    public string AboutEmailLabel { get; init; } = string.Empty;
+    public string AboutGitHubLabel { get; init; } = string.Empty;
     public string VersionLabel { get; init; } = string.Empty;
     public string Close { get; init; } = string.Empty;
     public string CloseTooltip { get; init; } = string.Empty;
@@ -545,10 +567,13 @@ public sealed record UiStrings
 
     public static UiStrings English { get; } = new()
     {
-        WindowTitle = "Windows 11 Optimization Center",
-        WindowSubtitle = "USB • Wi-Fi • Ethernet • Power management",
-        AppTitle = "Windows 11 Optimization Center",
-        AppSubtitle = "Network adapters, USB and power management",
+        WindowTitle = "Windows 11 Network Interface & USB Power Management Optimizer",
+        WindowSubtitle = "Intel Wi-Fi 6E AX210 · Realtek Gaming 2.5GbE / RTL8125 · USB Selective Suspend",
+        AppTitle = "Windows 11 Network Interface & USB Power Management Optimizer",
+        AppSubtitle = "Intel Wi-Fi 6E AX210 · Realtek Gaming 2.5GbE / RTL8125 · USB Selective Suspend",
+        AdapterColumn = "Adapter",
+        StatusColumn = "Status",
+        SpeedColumn = "Link speed",
         LanguageLabel = "Language",
         ScanAgain = "Scan again",
         ScanTooltip = "Refresh the detected network adapters.",
@@ -587,8 +612,11 @@ public sealed record UiStrings
         SecurityDescription = "Scanning only reads device information. Changes are made only after you select Apply settings and approve the Windows UAC prompt.",
         LogTitle = "Operation details",
         AboutTitle = "About",
-        AboutDescription = "A Windows 11 utility for network-adapter, USB and power-management settings.",
-        VersionLabel = "Version 1.0.0",
+        AboutDescription = "Windows 11 network-adapter and USB power-management utility.",
+        AboutAuthorLabel = "Author",
+        AboutEmailLabel = "Email",
+        AboutGitHubLabel = "GitHub repository",
+        VersionLabel = "Version 1.1.0",
         Close = "Close",
         CloseTooltip = "Close the application.",
         ProfileHelpTitle = "Optimization profiles",
@@ -600,7 +628,7 @@ public sealed record UiStrings
         ScriptMissingStatus = "Optimization script not found",
         SelectAdapterStatus = "Select a network adapter",
         ApplyingStatus = "Applying optimization...",
-        ConfirmUacDetail = "Approve the Windows UAC prompt to continue.",
+        ConfirmUacDetail = "Approve the Windows UAC prompt to continue. PowerShell runs in the background; progress appears here.",
         LogStarting = "Starting the script. Waiting for the first log entry...",
         LogDisabled = "Starting the script. Detailed logging is disabled.",
         ProcessStartError = "Could not start the PowerShell process.",
@@ -608,7 +636,7 @@ public sealed record UiStrings
         ApplyCompletedStatus = "Optimization completed",
         ProfileCompletedDetail = "The “{0}” profile finished.",
         ScriptFailedStatus = "The script reported an error",
-        ExitCodeDetail = "Exit code: {0}. Review the log and the PowerShell window.",
+        ExitCodeDetail = "Exit code: {0}. Review the operation log for details.",
         OperationCancelledStatus = "Operation cancelled",
         UacCancelledDetail = "The UAC prompt was not approved; settings were not changed.",
         ApplyFailedStatus = "Could not run the optimization",
@@ -620,10 +648,13 @@ public sealed record UiStrings
 
     public static UiStrings Polish { get; } = new()
     {
-        WindowTitle = "Centrum optymalizacji Windows 11",
-        WindowSubtitle = "USB • Wi-Fi • Ethernet • Zarządzanie energią",
-        AppTitle = "Centrum optymalizacji Windows 11",
-        AppSubtitle = "Karty sieciowe, USB i zarządzanie energią",
+        WindowTitle = "Optymalizator kart sieciowych i zasilania USB — Windows 11",
+        WindowSubtitle = "Intel Wi-Fi 6E AX210 · Realtek Gaming 2.5GbE / RTL8125 · oszczędzanie energii USB",
+        AppTitle = "Optymalizator kart sieciowych i zasilania USB — Windows 11",
+        AppSubtitle = "Intel Wi-Fi 6E AX210 · Realtek Gaming 2.5GbE / RTL8125 · oszczędzanie energii USB",
+        AdapterColumn = "Karta sieciowa",
+        StatusColumn = "Stan",
+        SpeedColumn = "Szybkość łącza",
         LanguageLabel = "Język",
         ScanAgain = "Skanuj ponownie",
         ScanTooltip = "Ponownie wykrywa karty sieciowe.",
@@ -662,8 +693,11 @@ public sealed record UiStrings
         SecurityDescription = "Skanowanie tylko odczytuje informacje o urządzeniach. Zmiany zostaną wykonane dopiero po wybraniu „Zastosuj ustawienia” i zaakceptowaniu monitu UAC.",
         LogTitle = "Szczegóły wykonania",
         AboutTitle = "Informacje",
-        AboutDescription = "Narzędzie Windows 11 do konfiguracji kart sieciowych, USB i zarządzania energią.",
-        VersionLabel = "Wersja 1.0.0",
+        AboutDescription = "Narzędzie Windows 11 do zarządzania energią kart sieciowych i USB.",
+        AboutAuthorLabel = "Autor",
+        AboutEmailLabel = "E-mail",
+        AboutGitHubLabel = "Repozytorium GitHub",
+        VersionLabel = "Wersja 1.1.0",
         Close = "Zamknij",
         CloseTooltip = "Zamyka aplikację.",
         ProfileHelpTitle = "Profile optymalizacji",
@@ -675,7 +709,7 @@ public sealed record UiStrings
         ScriptMissingStatus = "Nie znaleziono skryptu optymalizacji",
         SelectAdapterStatus = "Wybierz kartę sieciową",
         ApplyingStatus = "Trwa optymalizacja...",
-        ConfirmUacDetail = "Zaakceptuj monit UAC systemu Windows, aby kontynuować.",
+        ConfirmUacDetail = "Zaakceptuj monit UAC systemu Windows. PowerShell działa w tle, a postęp jest widoczny tutaj.",
         LogStarting = "Uruchamianie skryptu. Oczekiwanie na pierwszy wpis logu...",
         LogDisabled = "Uruchamianie skryptu. Szczegółowy log jest wyłączony.",
         ProcessStartError = "Nie udało się uruchomić procesu PowerShell.",
@@ -683,7 +717,7 @@ public sealed record UiStrings
         ApplyCompletedStatus = "Optymalizacja zakończona",
         ProfileCompletedDetail = "Profil „{0}” zakończył działanie.",
         ScriptFailedStatus = "Skrypt zgłosił błąd",
-        ExitCodeDetail = "Kod zakończenia: {0}. Sprawdź log i okno PowerShell.",
+        ExitCodeDetail = "Kod zakończenia: {0}. Szczegóły znajdziesz w logu operacji.",
         OperationCancelledStatus = "Operacja anulowana",
         UacCancelledDetail = "Monit UAC nie został zaakceptowany; ustawienia nie zostały zmienione.",
         ApplyFailedStatus = "Nie udało się uruchomić optymalizacji",

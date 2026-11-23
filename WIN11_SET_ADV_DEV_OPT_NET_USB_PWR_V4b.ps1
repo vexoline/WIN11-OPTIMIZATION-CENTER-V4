@@ -58,6 +58,7 @@ param(
     [switch]$TestMode,
     [switch]$GenerateLog,
     [string]$LogDirectory = (Join-Path $PSScriptRoot "Log"),
+    [string]$LiveLogPath = (Join-Path $LogDirectory "WIN11_USB_NETWORK_OPTIMIZATION.live.log"),
     [switch]$NonInteractive
 )
 
@@ -77,11 +78,20 @@ $logLines += "Profile: $Profile"
 $logLines += if ($AdapterName) { "Selected adapter: $AdapterName" } else { "Selected adapter: All network adapters" }
 $logLines += ""
 
-$liveLogPath = $null
+$script:liveLogPath = $LiveLogPath
+if ($script:liveLogPath) {
+    $liveLogDirectory = Split-Path -Parent $script:liveLogPath
+    if ($liveLogDirectory) {
+        New-Item -ItemType Directory -Path $liveLogDirectory -Force | Out-Null
+    }
+    $logLines | Out-File -FilePath $script:liveLogPath -Encoding UTF8
+}
+
+$detailedLogPath = $null
 if ($GenerateLog) {
     New-Item -ItemType Directory -Path $LogDirectory -Force | Out-Null
-    $liveLogPath = Join-Path $LogDirectory "WIN11_USB_NETWORK_OPTIMIZATION.log"
-    $logLines | Out-File -FilePath $liveLogPath -Encoding UTF8
+    $detailedLogPath = Join-Path $LogDirectory "WIN11_USB_NETWORK_OPTIMIZATION.log"
+    $logLines | Out-File -FilePath $detailedLogPath -Encoding UTF8
 }
 
 
@@ -91,10 +101,39 @@ function Add-Log {
     )
 
     $script:logLines += $Message
-    if ($script:liveLogPath) {
-        $Message | Out-File -FilePath $script:liveLogPath -Append -Encoding UTF8
+    if ($script:detailedLogPath) {
+        $Message | Out-File -FilePath $script:detailedLogPath -Append -Encoding UTF8
     }
 
+}
+
+function Write-Host {
+    [CmdletBinding()]
+    param(
+        [Parameter(Position = 0, ValueFromPipeline = $true)]
+        [AllowNull()]
+        [object]$Object,
+        [switch]$NoNewline,
+        [object]$Separator = " ",
+        [ConsoleColor]$ForegroundColor,
+        [ConsoleColor]$BackgroundColor
+    )
+
+    process {
+        if ($script:liveLogPath -and $null -ne $Object) {
+            $message = (@($Object) | ForEach-Object { [string]$_ }) -join [string]$Separator
+            if (-not [string]::IsNullOrWhiteSpace($message)) {
+                Add-Content -Path $script:liveLogPath -Value $message -Encoding UTF8 -ErrorAction Stop
+            }
+        }
+
+        $hostParameters = @{ Object = $Object }
+        if ($NoNewline) { $hostParameters.NoNewline = $true }
+        if ($PSBoundParameters.ContainsKey("Separator")) { $hostParameters.Separator = $Separator }
+        if ($PSBoundParameters.ContainsKey("ForegroundColor")) { $hostParameters.ForegroundColor = $ForegroundColor }
+        if ($PSBoundParameters.ContainsKey("BackgroundColor")) { $hostParameters.BackgroundColor = $BackgroundColor }
+        Microsoft.PowerShell.Utility\Write-Host @hostParameters
+    }
 }
 
 if ($TestMode -or $Profile -eq "Testowy") {
@@ -104,8 +143,8 @@ if ($TestMode -or $Profile -eq "Testowy") {
     Add-Log "Network adapter power management | Would be disabled"
     Add-Log "Intel AX210 advanced settings | Would be checked and optimized"
     Add-Log "Realtek RTL8125 advanced settings | Would be checked and optimized"
-    if ($liveLogPath) {
-        $logLines | Out-File -FilePath $liveLogPath -Encoding UTF8
+    if ($detailedLogPath) {
+        $logLines | Out-File -FilePath $detailedLogPath -Encoding UTF8
     }
     if (-not $NonInteractive) {
         Read-Host "Press Enter to exit"
@@ -815,7 +854,15 @@ Add-Log "Optimization process completed."
 Write-Host "----------------------------------------------------------------" `
     -ForegroundColor DarkGray
 
-$saveLog = if ($GenerateLog -or $NonInteractive) { "Y" } else { Read-Host "Do you want to save optimization log? (Y/N)" }
+$saveLog = if ($NonInteractive) {
+    if ($GenerateLog) { "Y" } else { "N" }
+}
+elseif ($GenerateLog) {
+    "Y"
+}
+else {
+    Read-Host "Do you want to save optimization log? (Y/N)"
+}
 
 
 if ($saveLog -match '^(Y|YES|Yes|yes)$') {
